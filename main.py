@@ -2,6 +2,7 @@ import operator
 from database import db_Session
 import core
 
+
 def get_truth(inp, relate, cut):
     ops = {'>': operator.gt,
            '<': operator.lt,
@@ -19,3 +20,7 @@ def get_truth(inp, relate, cut):
 
 
 core = core.Core(db_Session)
+core.declare_fact("x", 5)
+core.declare_fact("y", "5")
+print(core.facts)
+core.start()

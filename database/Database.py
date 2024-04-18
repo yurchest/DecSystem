@@ -40,6 +40,13 @@ class Database:
                 """)
         return self.cur.fetchall()
 
+    @exception_handler
+    def get_facts(self):
+        self.connection.row_factory = sqlite3.Row
+        c = self.connection.cursor()
+        c.execute('select * from FACTS')
+        self.connection.row_factory = tuple()
+        return [dict(row) for row in c.fetchall()]
 
     @exception_handler
     def select_one(self, sql, data=None):
