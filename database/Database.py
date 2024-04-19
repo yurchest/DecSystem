@@ -55,6 +55,12 @@ class Database:
         return row
 
     @exception_handler
+    def select_many(self, sql, data=None):
+        self.execute(sql, data)
+        row = self.cur.fetchall()
+        return row
+
+    @exception_handler
     def get_all_records(self, table_name: str):
         self.cur.execute(f"""
         SELECT * FROM {table_name}

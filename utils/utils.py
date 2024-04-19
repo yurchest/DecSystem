@@ -1,3 +1,6 @@
+import operator
+
+
 def is_number(num):
     try:
         float(num)
@@ -33,3 +36,18 @@ def is_fact_type(value, fact_type: str) -> bool:
         return True
     else:
         return False
+
+
+def get_truth(fact_value, relate: str, value) -> bool:
+    ops = {'gt': operator.gt,  # >
+           'lt': operator.lt,  # <
+           'ge': operator.ge,  # >=
+           'le': operator.le,  # <=
+           'eq': operator.eq}  # ==
+
+    if relate not in ops:
+        return False
+    elif fact_value is None or value is None:
+        return False
+    else:
+        return ops[relate](fact_value, value)

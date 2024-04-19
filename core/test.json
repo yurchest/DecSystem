@@ -1,0 +1,44 @@
+[
+  {
+    "RULE_NAME": "Rule_1",
+    "RULE_LHS": [
+      {
+        "LHS_FACT_NAME": "x",
+        "LHS_OP": "lt",
+        "LHS_VALUE": 100.0,
+      },
+      {
+        "LHS_FACT_NAME": "y",
+        "LHS_OP": "eq",
+        "LHS_VALUE": "Russia",
+      }
+    ],
+    "RULE_RHS": {
+      "RHS_FACT_NAME": "z",
+      "RHS_FACT_VALUE": 1
+    },
+    "COMMENT": "",
+    "ADD_DATE": ""
+  },
+  {
+    "RULE_NAME": "Rule_2",
+    "RULE_LHS": [
+      {
+        "LHS_FACT_NAME": "x",
+        "LHS_OP": "lt",
+        "LHS_VALUE": 100.0,
+      },
+      {
+        "LHS_FACT_NAME": "y",
+        "LHS_OP": "",
+        "LHS_VALUE": "Russia",
+      }
+    ],
+    "RULE_RHS": {
+      "RHS_FACT_NAME": "z",
+      "RHS_FACT_VALUE": 1
+    },
+    "COMMENT": "",
+    "ADD_DATE": ""
+  }
+]
