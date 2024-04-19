@@ -1,0 +1,101 @@
+[
+  {
+    "RULE_NAME": "Rule_1",
+    "RULE_LHS": [
+      {
+        "LHS_FACT_NAME": "x",
+        "LHS_OP": "lt",
+        "LHS_VALUE": 100.0
+      },
+      {
+        "LHS_FACT_NAME": "y",
+        "LHS_OP": "lt",
+        "LHS_VALUE": 100.0
+      },
+      {
+        "LHS_FACT_NAME": "x",
+        "LHS_OP": "lt",
+        "LHS_VALUE": 100.0
+      },
+      {
+        "LHS_FACT_NAME": "y",
+        "LHS_OP": "lt",
+        "LHS_VALUE": 100.0
+      }
+    ],
+    "RULE_RHS": {
+      "RHS_FACT_NAME": "y",
+      "RHS_FACT_VALUE": 1.0
+    },
+    "COMMENT": null,
+    "ADD_DATE": null
+  },
+  {
+    "RULE_NAME": "Rule_2",
+    "RULE_LHS": [
+      {
+        "LHS_FACT_NAME": "x",
+        "LHS_OP": "gt",
+        "LHS_VALUE": 50.0
+      }
+    ],
+    "RULE_RHS": {
+      "RHS_FACT_NAME": "y",
+      "RHS_FACT_VALUE": 2.0
+    },
+    "COMMENT": "",
+    "ADD_DATE": null
+  },
+  {
+    "RULE_NAME": "Rule_3",
+    "RULE_LHS": [
+      {
+        "LHS_FACT_NAME": "x",
+        "LHS_OP": "lt",
+        "LHS_VALUE": 100.0
+      },
+      {
+        "LHS_FACT_NAME": "y",
+        "LHS_OP": "lt",
+        "LHS_VALUE": 100.0
+      },
+      {
+        "LHS_FACT_NAME": "x",
+        "LHS_OP": "lt",
+        "LHS_VALUE": 100.0
+      },
+      {
+        "LHS_FACT_NAME": "y",
+        "LHS_OP": "lt",
+        "LHS_VALUE": 100.0
+      }
+    ],
+    "RULE_RHS": {
+      "RHS_FACT_NAME": "y",
+      "RHS_FACT_VALUE": 1.0
+    },
+    "COMMENT": null,
+    "ADD_DATE": null
+  },
+  {
+    "RULE_NAME": "Rule_4",
+    "RULE_LHS": [
+      {
+        "LHS_FACT_NAME": "x",
+        "LHS_OP": "lt",
+        "LHS_VALUE": 100.0
+      },
+      {
+        "LHS_FACT_NAME": "y",
+        "LHS_OP": "lt",
+        "LHS_VALUE": 100.0
+      }
+    ],
+    "RULE_RHS": {
+      "RHS_FACT_NAME": "y",
+      "RHS_FACT_VALUE": 1.0
+    },
+    "COMMENT": null,
+    "ADD_DATE": null
+  }
+]

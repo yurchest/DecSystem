@@ -74,7 +74,8 @@ class Core:
             # rule_lhs_list = rule[1].split(";")
             rule_rhs_fact_name = rule["RULE_RHS"]["RHS_FACT_NAME"]
             rule_rhs_fact_value = rule["RULE_RHS"]["RHS_FACT_VALUE"]
-            rule_rhs_fact_value = utils.retype_fact_value(rule_rhs_fact_value, self.facts_db[rule_rhs_fact_name]["FACT_TYPE"])
+            rule_rhs_fact_value = utils.retype_fact_value(rule_rhs_fact_value,
+                                                          self.facts_db[rule_rhs_fact_name]["FACT_TYPE"])
             if self.__is_true_rule(rule["RULE_LHS"]):
                 if self.facts[rule_rhs_fact_name] != rule_rhs_fact_value:
                     print(f"Сработало правило {rule_name}")
@@ -164,4 +165,20 @@ class Core:
         return True if all(fl_list) else False
 
     def add_rule(self, rule: dict):
-        pass
+        """
+        Добавление правила в систему
+        Логика:
+        1. Валидация правила
+        2. Добавление в БД
+        3. Обновление self.rules путем запроса к БД
+        :param rule:
+        :return:
+        """
+        if not utils.is_validated_rule_schema(rule):
+            print("Правило не прошло валидацию по схеме и не было добавлено")
+            return
+
+        self.db.add_rule(rule)
+        self.rules = self.__get_rules()
+
+

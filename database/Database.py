@@ -77,6 +77,27 @@ class Database:
         self.commit()
 
     @exception_handler
+    def add_rule(self, rule: dict):
+        rule_name = rule["RULE_NAME"]
+        rule_lhs = rule["RULE_LHS"]  # list(dict)
+        rule_rhs = rule["RULE_RHS"]  # dict()
+        comment = rule["COMMENT"]
+        add_date = rule["ADD_DATE"]
+
+        self.execute(
+            """INSERT INTO RULES (RULE_NAME, RHS_FACT_NAME, RHS_FACT_VALUE, ADD_DATE, COMMENT) VALUES (?,?,?,?,?)""",
+            (rule_name, rule_rhs["RHS_FACT_NAME"], rule_rhs["RHS_FACT_VALUE"], add_date, comment)
+        )
+        data_to_lhs_table = list()
+        for lhs in rule_lhs:
+            data_to_lhs_table.append((rule_name, lhs["LHS_FACT_NAME"], lhs["LHS_OP"], lhs["LHS_VALUE"]))
+
+        self.executemany(
+            """INSERT INTO RULES_LHS (RULE_NAME, LHS_FACT_NAME, LHS_OP, LHS_VALUE) VALUES (?,?,?,?)""",
+            data_to_lhs_table
+        )
+
+    @exception_handler
     def executemany(self, sql, data):
         self.cur.executemany(sql, data)
         self.commit()

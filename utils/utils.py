@@ -1,4 +1,7 @@
 import operator
+import json
+import jsonschema
+from .config import ruleSchema
 
 
 def is_number(num):
@@ -32,7 +35,7 @@ def is_fact_type(value, fact_type: str) -> bool:
         return True
     elif fact_type == "number" and isinstance(value, float):
         return True
-    elif fact_type == "bool" and isinstance(value, int):
+    elif fact_type == "bool" and isinstance(value, bool):
         return True
     else:
         return False
@@ -51,3 +54,18 @@ def get_truth(fact_value, relate: str, value) -> bool:
         return False
     else:
         return ops[relate](fact_value, value)
+
+
+def out_to_json(dict: dict):
+    with open("rules.json", "w") as outfile:
+        json.dump(dict, outfile, indent=2, sort_keys=False)
+
+
+def is_validated_rule_schema(rule: dict) -> bool:
+    try:
+        jsonschema.validate(instance=rule, schema=ruleSchema)
+        return True
+    except jsonschema.exceptions.ValidationError as ex:
+        print(ex)
+        exit(-1)  # TODO
+        return False
