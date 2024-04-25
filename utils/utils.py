@@ -1,7 +1,6 @@
 import operator
 import json
 import jsonschema
-from .config import ruleSchema
 
 
 def is_number(num):
@@ -12,11 +11,12 @@ def is_number(num):
         return False
 
 
-def is_flag(num):
-    if int(num) in [0, 1]:
-        return True
-    else:
-        return False
+def is_bool(value) -> bool:
+    return True if value in ["True", "False"] else False
+
+
+def str2bool(v):
+    return v.lower() in ("true",)
 
 
 def retype_fact_value(value, fact_type: str):
@@ -24,8 +24,8 @@ def retype_fact_value(value, fact_type: str):
         return str(value)
     elif fact_type == "number" and is_number(value):
         return float(value)
-    elif fact_type == "flag" and is_flag(value):
-        return int(value)
+    elif fact_type == "bool" and is_bool(value):
+        return str2bool(value)
     else:
         return value
 
@@ -61,11 +61,11 @@ def out_to_json(dict: dict):
         json.dump(dict, outfile, indent=2, sort_keys=False)
 
 
-def is_validated_rule_schema(rule: dict) -> bool:
+def is_validated_schema(rule: dict, schema) -> bool:
     try:
-        jsonschema.validate(instance=rule, schema=ruleSchema)
+        jsonschema.validate(instance=rule, schema=schema)
         return True
     except jsonschema.exceptions.ValidationError as ex:
-        print(ex)
-        exit(-1)  # TODO
+        # print(ex)
         return False
+        # exit(-1)  # TODO

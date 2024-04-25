@@ -1,101 +1,82 @@
 [
   {
-    "RULE_NAME": "Rule_1",
+    "RULE_NAME": "Rule_Segment_FA",
     "RULE_LHS": [
       {
-        "LHS_FACT_NAME": "x",
-        "LHS_OP": "lt",
-        "LHS_VALUE": 100.0
-      },
-      {
-        "LHS_FACT_NAME": "y",
-        "LHS_OP": "lt",
-        "LHS_VALUE": 100.0
-      },
-      {
-        "LHS_FACT_NAME": "x",
-        "LHS_OP": "lt",
-        "LHS_VALUE": 100.0
-      },
-      {
-        "LHS_FACT_NAME": "y",
-        "LHS_OP": "lt",
-        "LHS_VALUE": 100.0
+        "LHS_FACT_NAME": "applFaFlag",
+        "LHS_OP": "eq",
+        "LHS_VALUE": true
       }
     ],
     "RULE_RHS": {
-      "RHS_FACT_NAME": "y",
-      "RHS_FACT_VALUE": 1.0
+      "RHS_FACT_NAME": "cusSegment",
+      "RHS_FACT_VALUE": "FA"
     },
-    "COMMENT": null,
-    "ADD_DATE": null
+    "COMMENT": "\u041e\u043f\u0440\u0435\u0434\u0435\u043b\u0435\u043d\u0438\u0435 \u0441\u0435\u0433\u043c\u0435\u043d\u0442\u0430 \u043a\u043b\u0438\u0435\u043d\u0442\u0430",
+    "ADD_DATE": "2024-04-25 15:05:45"
   },
   {
-    "RULE_NAME": "Rule_2",
+    "RULE_NAME": "Rule_Segment_EXIST_1",
     "RULE_LHS": [
       {
-        "LHS_FACT_NAME": "x",
+        "LHS_FACT_NAME": "cusIsOwnWorker",
+        "LHS_OP": "eq",
+        "LHS_VALUE": true
+      }
+    ],
+    "RULE_RHS": {
+      "RHS_FACT_NAME": "cusSegment",
+      "RHS_FACT_VALUE": "EXIST"
+    },
+    "COMMENT": "\u041e\u043f\u0440\u0435\u0434\u0435\u043b\u0435\u043d\u0438\u0435 \u0441\u0435\u0433\u043c\u0435\u043d\u0442\u0430 \u043a\u043b\u0438\u0435\u043d\u0442\u0430",
+    "ADD_DATE": "2024-04-25 15:08:15"
+  },
+  {
+    "RULE_NAME": "Rule_Segment_EXIST_2",
+    "RULE_LHS": [
+      {
+        "LHS_FACT_NAME": "cusDepositsCount",
         "LHS_OP": "gt",
-        "LHS_VALUE": 50.0
+        "LHS_VALUE": 0.0
       }
     ],
     "RULE_RHS": {
-      "RHS_FACT_NAME": "y",
-      "RHS_FACT_VALUE": 2.0
+      "RHS_FACT_NAME": "cusSegment",
+      "RHS_FACT_VALUE": "EXIST"
     },
-    "COMMENT": "",
-    "ADD_DATE": null
+    "COMMENT": "\u041e\u043f\u0440\u0435\u0434\u0435\u043b\u0435\u043d\u0438\u0435 \u0441\u0435\u0433\u043c\u0435\u043d\u0442\u0430 \u043a\u043b\u0438\u0435\u043d\u0442\u0430",
+    "ADD_DATE": "2024-04-25 15:10:30"
   },
   {
-    "RULE_NAME": "Rule_3",
+    "RULE_NAME": "Rule_Age_1",
     "RULE_LHS": [
       {
-        "LHS_FACT_NAME": "x",
-        "LHS_OP": "lt",
-        "LHS_VALUE": 100.0
-      },
-      {
-        "LHS_FACT_NAME": "y",
-        "LHS_OP": "lt",
-        "LHS_VALUE": 100.0
-      },
-      {
-        "LHS_FACT_NAME": "x",
-        "LHS_OP": "lt",
-        "LHS_VALUE": 100.0
-      },
-      {
-        "LHS_FACT_NAME": "y",
-        "LHS_OP": "lt",
-        "LHS_VALUE": 100.0
+        "LHS_FACT_NAME": "cusAge",
+        "LHS_OP": "gt",
+        "LHS_VALUE": 75.0
       }
     ],
     "RULE_RHS": {
-      "RHS_FACT_NAME": "y",
-      "RHS_FACT_VALUE": 1.0
+      "RHS_FACT_NAME": "DECISION_RESULT",
+      "RHS_FACT_VALUE": "Reject"
     },
-    "COMMENT": null,
-    "ADD_DATE": null
+    "COMMENT": "\u041e\u0442\u0441\u0435\u0447\u0435\u043d\u0438\u0435 \u043f\u043e \u0432\u043e\u0437\u0440\u0430\u0441\u0442\u0443",
+    "ADD_DATE": "2024-04-25 16:37:02"
   },
   {
-    "RULE_NAME": "Rule_4",
+    "RULE_NAME": "Rule_Age_2",
     "RULE_LHS": [
       {
-        "LHS_FACT_NAME": "x",
+        "LHS_FACT_NAME": "cusAge",
         "LHS_OP": "lt",
-        "LHS_VALUE": 100.0
-      },
-      {
-        "LHS_FACT_NAME": "y",
-        "LHS_OP": "lt",
-        "LHS_VALUE": 100.0
+        "LHS_VALUE": 20.0
       }
     ],
     "RULE_RHS": {
-      "RHS_FACT_NAME": "y",
-      "RHS_FACT_VALUE": 1.0
+      "RHS_FACT_NAME": "DECISION_RESULT",
+      "RHS_FACT_VALUE": "Reject"
     },
-    "COMMENT": null,
-    "ADD_DATE": null
+    "COMMENT": "\u041e\u0442\u0441\u0435\u0447\u0435\u043d\u0438\u0435 \u043f\u043e \u0432\u043e\u0437\u0440\u0430\u0441\u0442\u0443",
+    "ADD_DATE": "2024-04-25 16:42:37"
   }
 ]

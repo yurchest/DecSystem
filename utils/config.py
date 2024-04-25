@@ -10,7 +10,7 @@ ruleSchema = {
                     "properties": {
                         "LHS_FACT_NAME": {"type": "string"},
                         "LHS_OP": {"type": "string"},
-                        "LHS_VALUE": {"type": ["string", "number", "boolean"]}
+                        "LHS_VALUE": {"type": ["string", "number"]}
                     },
                     "additionalProperties": False,
                     "minProperties": 3
@@ -26,8 +26,19 @@ ruleSchema = {
             "minProperties": 2
         },
         "COMMENT": {"type": ["string", "null"]},
-        "ADD_DATE": {"type": ["string", "null"]},
     },
     "additionalProperties": False,
-    "minProperties": 5
+    "minProperties": 4
+}
+
+fact_schema = {
+    "type": "object",
+    "properties": {
+        "FACT_NAME": {"type": "string"},
+        "FACT_TYPE": {"type": "string", "enum": ["text", "number", "bool"]},
+        "COMMENT": {"type": "string"},
+        "DEFAULT_VALUE": {"type": "string"}
+    },
+    "additionalProperties": False,
+    "minProperties": 3
 }

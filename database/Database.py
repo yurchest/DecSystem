@@ -1,4 +1,5 @@
 import sqlite3
+from datetime import datetime
 
 
 def exception_handler(func):
@@ -82,7 +83,7 @@ class Database:
         rule_lhs = rule["RULE_LHS"]  # list(dict)
         rule_rhs = rule["RULE_RHS"]  # dict()
         comment = rule["COMMENT"]
-        add_date = rule["ADD_DATE"]
+        add_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         self.execute(
             """INSERT INTO RULES (RULE_NAME, RHS_FACT_NAME, RHS_FACT_VALUE, ADD_DATE, COMMENT) VALUES (?,?,?,?,?)""",
@@ -95,6 +96,20 @@ class Database:
         self.executemany(
             """INSERT INTO RULES_LHS (RULE_NAME, LHS_FACT_NAME, LHS_OP, LHS_VALUE) VALUES (?,?,?,?)""",
             data_to_lhs_table
+        )
+
+    @exception_handler
+    def add_fact(self, fact: dict):
+        fact_name = fact["FACT_NAME"]
+        fact_type = fact["FACT_TYPE"]
+        comment = fact["COMMENT"]
+        add_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        default_value = None
+        if "DEFAULT_VALUE" in fact:
+            default_value = fact["DEFAULT_VALUE"]
+        self.execute(
+            """INSERT INTO FACTS (FACT_NAME, FACT_TYPE, DEFAULT_VALUE, ADD_DATE, COMMENT) VALUES (?,?,?,?,?)""",
+            (fact_name, fact_type, default_value, add_date, comment)
         )
 
     @exception_handler

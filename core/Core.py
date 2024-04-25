@@ -65,7 +65,7 @@ class Core:
         """
         facts = dict()
         for i in self.fact_names:
-            facts[i] = None
+            facts[i] = self.facts_db[i]["DEFAULT_VALUE"]
         return facts
 
     def start(self):
@@ -78,10 +78,10 @@ class Core:
                                                           self.facts_db[rule_rhs_fact_name]["FACT_TYPE"])
             if self.__is_true_rule(rule["RULE_LHS"]):
                 if self.facts[rule_rhs_fact_name] != rule_rhs_fact_value:
-                    print(f"Сработало правило {rule_name}")
+                    # print(f"Сработало правило {rule_name}")
                     self.rules_activated.add(rule_name)
                     self.declare_fact(rule_rhs_fact_name, rule_rhs_fact_value)
-                    print(self.facts)
+                    # print(self.facts)
                     self.start()
 
     def __validate_rules_with_facts(self) -> None:
@@ -160,11 +160,12 @@ class Core:
             op = rule["LHS_OP"]
             value = rule["LHS_VALUE"]
             current_fact_value = self.facts[fact_name]
+            # print(current_fact_value, op, value)
             fl_list.append(utils.get_truth(current_fact_value, op, value))
 
         return True if all(fl_list) else False
 
-    def add_rule(self, rule: dict):
+    def add_rule(self, rule: dict) -> None:
         """
         Добавление правила в систему
         Логика:
@@ -174,11 +175,23 @@ class Core:
         :param rule:
         :return:
         """
-        if not utils.is_validated_rule_schema(rule):
+        if not utils.is_validated_schema(rule, utils.ruleSchema):
             print("Правило не прошло валидацию по схеме и не было добавлено")
             return
 
         self.db.add_rule(rule)
         self.rules = self.__get_rules()
 
-
+    def add_fact(self, fact: dict) -> None:
+        """
+        Добавление факта в список используемых фактов в БД
+        :param fact:
+        :return:
+        """
+        if not utils.is_validated_schema(fact, utils.fact_schema):
+            print("Факт не прошло валидацию по схеме и не было добавлен")
+            return
+        if fact["FACT_NAME"] in self.fact_names:
+            print("Факт уже существует")
+            return
+        self.db.add_fact(fact)
