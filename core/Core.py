@@ -1,6 +1,7 @@
 import utils
 from operator import itemgetter
 
+
 class Core:
     rules_activated = set()
 
@@ -9,9 +10,9 @@ class Core:
         self.facts_db = self.__get_facts_db()
         self.fact_names = list(self.facts_db.keys())
         self.rules = self.__get_rules()
-
+        self.rule_names = self.__get_rule_names()
         self.facts = self.__init_facts()
-        self.__validate_rules_with_facts()
+        self.validate_rules_with_facts()
 
     def __get_rules(self) -> list:
         """
@@ -49,6 +50,10 @@ class Core:
 
         return rules
 
+    def __get_rule_names(self):
+        rule_names = self.db.select_many("""SELECT RULE_NAME from RULES""")
+        return [x[0] for x in rule_names]
+
     def __get_facts_db(self):
         """
         Получение информации о фактах из БД
@@ -84,62 +89,90 @@ class Core:
                     # print(self.facts)
                     self.start()
 
-    def __validate_rules_with_facts(self) -> None:
-        """
-        Проверка наличия фактов, используемых в правилах, в БД фактов
-        Проверка типов данных в правилах и БД фактах
-        :return: None
-        """
-
-        # 1. Проверка наличия фактов, используемых в правилах, в БД фактов
+    def __validate_rule_with_facts(self, rule: dict) -> dict:
+        error_messages = []
+        # 1. Проверка наличия фактов, используемых в правиле, в БД фактов
         # Получение set всех фактов в правилах
-        facts_in_rules = set()
-        for rule in self.rules:
-            for lhs in rule["RULE_LHS"]:
-                facts_in_rules.add(lhs['LHS_FACT_NAME'])
+        fact_in_rules = set()
+        for lhs in rule["RULE_LHS"]:
+            fact_in_rules.add(lhs['LHS_FACT_NAME'])
 
-            facts_in_rules.add(rule["RULE_RHS"]["RHS_FACT_NAME"])
+        fact_in_rules.add(rule["RULE_RHS"]["RHS_FACT_NAME"])
 
         facts_in_facts_db = set(self.fact_names)
 
         # Если множество фактов из правил в множестве фактов из БД
-        if facts_in_rules.issubset(facts_in_facts_db):
+        if fact_in_rules.issubset(facts_in_facts_db):
             pass  # TODO
         else:
             # элементы первого списка которые НЕ находятся во втором списке
-            minus_sets = facts_in_rules - facts_in_facts_db
-            print(f"Факты {minus_sets} не инициализированы")
-            exit(-1)  # TODO
+            minus_sets = fact_in_rules - facts_in_facts_db
+            error_messages.append(
+                f"Ошибка валидации правила {rule['RULE_NAME']}.Факт(ы) {minus_sets} не инициализированы")
 
         # 2. Проверка типов данных в правилах и БД фактах
-        for rule in self.rules:
-            for lhs in rule["RULE_LHS"]:
-                fact_name = lhs["LHS_FACT_NAME"]
-                fact_value = lhs["LHS_VALUE"]
-                right_fact_type = self.facts_db[fact_name]["FACT_TYPE"]
-                if not utils.is_fact_type(fact_value, right_fact_type):
-                    print(f"В правиле {rule['RULE_NAME']} факт {fact_name} не имеет тип {right_fact_type}")
-                    exit(-1)
+        for lhs in rule["RULE_LHS"]:
+            fact_name = lhs["LHS_FACT_NAME"]
+            fact_value = utils.retype_fact_value(lhs["LHS_VALUE"], self.facts_db[fact_name]["FACT_TYPE"])
+            right_fact_type = self.facts_db[fact_name]["FACT_TYPE"]
+            if not utils.is_fact_type(fact_value, right_fact_type):
+                error_messages.append(
+                    f"Ошибка валидации правила {rule['RULE_NAME']}. В правиле {rule['RULE_NAME']} факт \
+                        {fact_name} не имеет тип {right_fact_type}")
 
-    def declare_fact(self, fact_name: str, fact_value) -> None:
+        if not error_messages:
+            return utils.return_message("success", None)
+        else:
+            return utils.return_message("error", error_messages)
+
+    def validate_rules_with_facts(self) -> dict:
         """
-        Декларирование факта (добавление факта в рабочую память)
-        :param fact_name:
-        :param fact_value:
-        :return: None
+        Проверка наличия фактов, используемых в правилах, в БД фактов
+        Проверка типов данных в правилах и БД фактах
+        :return: list[dict]
         """
+        error_messages = []
+        for rule in self.rules:
+            validation_result = self.__validate_rule_with_facts(rule)
+            if validation_result["messages"] is not None:
+                error_messages.extend(validation_result["messages"])
+        if not error_messages:
+            return utils.return_message("success", None)
+        else:
+            return utils.return_message("error", error_messages)
+
+    def declare_fact(self, fact_name, fact_value):
+        self.facts[fact_name] = fact_value
+
+    def declare_multiply_facts(self, facts: dict):
+        error_messages = []
+        for fact_name, fact_value in facts.items():
+            validation_result = self.__validate_fact_to_declare(fact_name, fact_value)
+            if validation_result["messages"] is not None:
+                error_messages.extend(validation_result["messages"])
+
+        if not error_messages:
+            for fact_name, fact_value in facts.items():
+                self.facts[fact_name] = utils.retype_fact_value(fact_value, self.facts_db[fact_name]["FACT_TYPE"])
+            return utils.return_message("success", None)
+        else:
+            return utils.return_message("error", error_messages)
+
+    def __validate_fact_to_declare(self, fact_name, fact_value) -> dict:
+        error_messages = []
         # Проверка наличия факта в БД
         if fact_name not in self.fact_names:
-            print(f"Факт '{fact_name}' не прошел валидацию")  # TODO
-            return
+            error_messages.append(f"Факт '{fact_name}' не инициализирован")
         fact_value = utils.retype_fact_value(fact_value, self.facts_db[fact_name]["FACT_TYPE"])
-        if self.__is_validated_fact_to_declare(fact_name, fact_value):
-            self.facts[fact_name] = fact_value
-        else:
-            print(f"Факт '{fact_name}' не прошел валидацию")  # TODO
-            return
+        if not self.__is_declared_type_is_right_type(fact_name, fact_value):
+            error_messages.append(f"Факт '{fact_name}' имеет неинициализированный тип")
 
-    def __is_validated_fact_to_declare(self, fact_name: str, fact_value) -> bool:
+        if not error_messages:
+            return utils.return_message("success", None)
+        else:
+            return utils.return_message("error", error_messages)
+
+    def __is_declared_type_is_right_type(self, fact_name: str, fact_value) -> bool:
         """
         Проверка типа задаваемого факта
         :param fact_name:
@@ -164,7 +197,28 @@ class Core:
             fl_list.append(utils.get_truth(current_fact_value, op, value))
         return True if all(fl_list) else False
 
-    def add_rule(self, rule: dict) -> None:
+    def add_fact(self, fact: dict) -> dict:
+        """
+        Добавление факта в список используемых фактов в БД
+        :param fact:
+        :return:
+        """
+        validation_result = self.__validate_fact_to_add(fact)
+        if validation_result["status"] == "success":
+            self.db.add_fact(fact)
+            return utils.return_message("success", None)
+        else:
+            return utils.return_message("error", validation_result["messages"])
+
+    def __validate_fact_to_add(self, fact: dict):
+        if not utils.is_validated_schema(fact, utils.init_fact_schema):
+            return utils.return_message("error", [f"Факт не прошел валидацию по схеме и не был добавлен"])
+        if fact["FACT_NAME"] in self.fact_names:
+            return utils.return_message("error", [f"Факт уже существует"])
+
+        return utils.return_message("success", None)
+
+    def add_rule(self, rule: dict) -> dict:
         """
         Добавление правила в систему
         Логика:
@@ -174,23 +228,21 @@ class Core:
         :param rule:
         :return:
         """
+        validation_result = self.__validate_rule_to_add(rule)
+        if validation_result["status"] == "success":
+            self.db.add_rule(rule)
+            return utils.return_message("success", None)
+        else:
+            return utils.return_message("error", validation_result["messages"])
+
+    def __validate_rule_to_add(self, rule: dict) -> dict:
         if not utils.is_validated_schema(rule, utils.ruleSchema):
-            print("Правило не прошло валидацию по схеме и не было добавлено")
-            return
+            return utils.return_message("error", ["Правило не прошло валидацию по схеме"])
+        # Рул уже существует
+        if rule["RULE_NAME"] in self.rule_names:
+            return utils.return_message("error", [f"Правило {rule['RULE_NAME']} уже существует"])
+        validation_result = self.__validate_rule_with_facts(rule)
+        if validation_result["status"] != "success":
+            return validation_result
 
-        self.db.add_rule(rule)
-        self.rules = self.__get_rules()
-
-    def add_fact(self, fact: dict) -> None:
-        """
-        Добавление факта в список используемых фактов в БД
-        :param fact:
-        :return:
-        """
-        if not utils.is_validated_schema(fact, utils.fact_schema):
-            print("Факт не прошло валидацию по схеме и не было добавлен")
-            return
-        if fact["FACT_NAME"] in self.fact_names:
-            print("Факт уже существует")
-            return
-        self.db.add_fact(fact)
+        return utils.return_message("success", None)

@@ -69,3 +69,10 @@ def is_validated_schema(rule: dict, schema) -> bool:
         # print(ex)
         return False
         # exit(-1)  # TODO
+
+
+def return_message(status: str, messages: list or None):
+    return {
+        "status": status,
+        "messages": messages
+    }

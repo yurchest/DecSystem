@@ -32,7 +32,8 @@ ruleSchema = {
     "minProperties": 4
 }
 
-fact_schema = {
+
+init_fact_schema = {
     "type": "object",
     "properties": {
         "FACT_NAME": {"type": "string"},
