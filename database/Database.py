@@ -83,11 +83,12 @@ class Database:
         rule_lhs = rule["RULE_LHS"]  # list(dict)
         rule_rhs = rule["RULE_RHS"]  # dict()
         comment = rule["COMMENT"]
+        priority = rule["PRIORITY"]
         add_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         self.execute(
-            """INSERT INTO RULES (RULE_NAME, RHS_FACT_NAME, RHS_FACT_VALUE, ADD_DATE, COMMENT) VALUES (?,?,?,?,?)""",
-            (rule_name, rule_rhs["RHS_FACT_NAME"], rule_rhs["RHS_FACT_VALUE"], add_date, comment)
+            """INSERT INTO RULES (RULE_NAME, RHS_FACT_NAME, RHS_FACT_VALUE, ADD_DATE, COMMENT, PRIORITY) VALUES (?,?,?,?,?,?)""",
+            (rule_name, rule_rhs["RHS_FACT_NAME"], rule_rhs["RHS_FACT_VALUE"], add_date, comment, priority)
         )
         data_to_lhs_table = list()
         for lhs in rule_lhs:

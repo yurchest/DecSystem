@@ -37,4 +37,5 @@ print(core.facts)
 #         "RHS_FACT_VALUE": "Reject"
 #     },
 #     "COMMENT": "Отсечение по возрасту",
+#     "PRIORITY": 3,
 # })

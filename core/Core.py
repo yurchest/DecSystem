@@ -1,5 +1,5 @@
 import utils
-
+from operator import itemgetter
 
 class Core:
     rules_activated = set()
@@ -19,7 +19,7 @@ class Core:
         :return: Список правил
         """
         rules = list()
-        for rule_record in self.db.get_all_records("RULES"):
+        for rule_record in sorted(self.db.get_all_records("RULES"), key=itemgetter(5)):
             # print(rule_record)
             rule_name = rule_record[0]
             rule_rhs = {
@@ -162,7 +162,6 @@ class Core:
             current_fact_value = self.facts[fact_name]
             # print(current_fact_value, op, value)
             fl_list.append(utils.get_truth(current_fact_value, op, value))
-
         return True if all(fl_list) else False
 
     def add_rule(self, rule: dict) -> None:

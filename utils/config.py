@@ -26,6 +26,7 @@ ruleSchema = {
             "minProperties": 2
         },
         "COMMENT": {"type": ["string", "null"]},
+        "PRIORITY": {"type": "number"},
     },
     "additionalProperties": False,
     "minProperties": 4
