@@ -33,7 +33,10 @@ def add_rule(rule: dict):
 
 
 test_input = {
-    "cusAge": "111",
+    "cusAge": "77",
+    "applFaFlag": True,
+    "cusDepositsCount": 5,
+
 }
 result = get_system_result(test_input)
 print(json.dumps(result, indent=2, ensure_ascii=False))
@@ -62,4 +65,3 @@ print(json.dumps(result, indent=2, ensure_ascii=False))
 #     "COMMENT": "Отсечение по возрасту",
 #     "PRIORITY": 3,
 # })
-

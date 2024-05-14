@@ -14,6 +14,8 @@ class Core:
         self.facts = self.__init_facts()
         self.validate_rules_with_facts()
 
+        print(self.facts)
+
     def __get_rules(self) -> list:
         """
         Получение правил из БД
@@ -75,6 +77,7 @@ class Core:
 
     def start(self):
         for rule in self.rules:
+            print(rule)
             rule_name = rule["RULE_NAME"]
             # rule_lhs_list = rule[1].split(";")
             rule_rhs_fact_name = rule["RULE_RHS"]["RHS_FACT_NAME"]
@@ -82,7 +85,10 @@ class Core:
             rule_rhs_fact_value = utils.retype_fact_value(rule_rhs_fact_value,
                                                           self.facts_db[rule_rhs_fact_name]["FACT_TYPE"])
             if self.__is_true_rule(rule["RULE_LHS"]):
-                if self.facts[rule_rhs_fact_name] != rule_rhs_fact_value:
+                if self.facts[rule_rhs_fact_name] != rule_rhs_fact_value \
+                        and self.facts[rule_rhs_fact_name] == self.facts_db[rule_rhs_fact_name]["DEFAULT_VALUE"]:
+                    # Для предотвращения бесконечной рекурсии (зацикливания) факт можно обновлять только один раз
+
                     # print(f"Сработало правило {rule_name}")
                     self.rules_activated.add(rule_name)
                     self.declare_fact(rule_rhs_fact_name, rule_rhs_fact_value)

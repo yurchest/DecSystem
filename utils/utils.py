@@ -56,9 +56,9 @@ def get_truth(fact_value, relate: str, value) -> bool:
         return ops[relate](fact_value, value)
 
 
-def out_to_json(dict: dict):
+def out_to_json(dictionary: dict):
     with open("rules.json", "w") as outfile:
-        json.dump(dict, outfile, indent=2, sort_keys=False)
+        json.dump(dictionary, outfile, indent=2, sort_keys=False)
 
 
 def is_validated_schema(rule: dict, schema) -> bool:
