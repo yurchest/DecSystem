@@ -11,4 +11,4 @@ featuretools==1.31.0
 setuptools==75.5.0
 mlxtend==0.23.3
 optuna==4.1.0
-catboost=1.2.7
+catboost==1.2.7
