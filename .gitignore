@@ -5,5 +5,4 @@ __pycache__*
 /model/data/*
 /model/catboost_info/*
 /model/data*
-/utils/*
 /model/data_all.pkl

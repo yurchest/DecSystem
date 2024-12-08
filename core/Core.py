@@ -15,6 +15,7 @@ class Core:
         self.validate_rules_with_facts()
 
         print(self.facts)
+        print(*self.rules, sep="\n")
 
     def __get_rules(self) -> list:
         """
@@ -77,7 +78,6 @@ class Core:
 
     def start(self):
         for rule in self.rules:
-            print(rule)
             rule_name = rule["RULE_NAME"]
             # rule_lhs_list = rule[1].split(";")
             rule_rhs_fact_name = rule["RULE_RHS"]["RHS_FACT_NAME"]
@@ -237,18 +237,37 @@ class Core:
         validation_result = self.__validate_rule_to_add(rule)
         if validation_result["status"] == "success":
             self.db.add_rule(rule)
-            return utils.return_message("success", None)
+            return validation_result
         else:
-            return utils.return_message("error", validation_result["messages"])
+            return validation_result
 
     def __validate_rule_to_add(self, rule: dict) -> dict:
         if not utils.is_validated_schema(rule, utils.ruleSchema):
             return utils.return_message("error", ["Правило не прошло валидацию по схеме"])
         # Рул уже существует
         if rule["RULE_NAME"] in self.rule_names:
-            return utils.return_message("error", [f"Правило {rule['RULE_NAME']} уже существует"])
+            return utils.return_message("error", [f"Правило с именем '{rule['RULE_NAME']}' уже существует"])
         validation_result = self.__validate_rule_with_facts(rule)
         if validation_result["status"] != "success":
             return validation_result
 
+        # Поиск возможности объединения / пересечения правил
+        res = self.get_similar_rules(rule)
+        if res["status"] != "success":
+            return utils.return_message("success", [f"Найдены похожие правила {res['messages']}"])
         return utils.return_message("success", None)
+
+    def get_similar_rules(self, rule_to_add) -> dict:
+        # lhs_fact_name_to_add
+        similar_rules = []
+        for rule in self.rules:
+            if rule["RULE_RHS"]["RHS_FACT_NAME"] == rule_to_add["RULE_RHS"]["RHS_FACT_NAME"] \
+                    and rule["RULE_RHS"]["RHS_FACT_VALUE"] == rule_to_add["RULE_RHS"]["RHS_FACT_VALUE"] \
+                    and set([x["LHS_FACT_NAME"] for x in rule["RULE_LHS"]]) == \
+                    set([x["LHS_FACT_NAME"] for x in rule_to_add["RULE_LHS"]]):
+
+                similar_rules.append(rule["RULE_NAME"])
+        if similar_rules is None:
+            return utils.return_message("success", None)
+        else:
+            return utils.return_message("warning", similar_rules)
