@@ -12,3 +12,5 @@ setuptools==75.5.0
 mlxtend==0.23.3
 optuna==4.1.0
 catboost==1.2.7
+shap
+ipywidgets==8.1.5
