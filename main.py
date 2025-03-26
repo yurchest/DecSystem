@@ -13,12 +13,25 @@ def get_system_result(input_facts: dict):
     if not init_validation_result["status"] == "success":
         return init_validation_result
     core_object.start()
+    # print(core_object.rules_activated)
+
+    updated_dict = core_object.facts
+    # Находим ключи, которые есть в updated_dict, но отсутствуют в test_input
+    added_keys = updated_dict.keys() - input_facts.keys()
+    # Формируем словарь только с добавленными элементами
+    added_facts = {key: updated_dict[key] for key in added_keys}
 
     __result = {
         "status": "success",
-        "facts": core_object.facts,
-        "rules": list(core_object.rules_activated)
+        "facts": added_facts,
+        "rules":  [rule for rule in core_object.rules_activated if rule["rule_type"] != "Tech"]
     }
+
+    # __result = {
+    #     "status": "success",
+    #     "facts": core_object.facts,
+    #     "rules":  core_object.rules_activated
+    # }
     return __result
 
 
@@ -33,38 +46,46 @@ def add_rule(rule: dict):
 
 
 test_input = {
-    "cusAge": "77",
-    "applFaFlag": True,
-    "cusDepositsCount": 5,
-    "Salary": 2000
-
+    "depositCount": 1,
+    "emplBank": False,
+    "cusPassStoplist": False,
+    "cusFIODRStoplist": False,
+    "cusAddressStoplist": False,
+    "cusMobPhoneStoplist": False,
+    # "cusImpression": "Negative"
 }
 result = get_system_result(test_input)
 
 
 # result = add_fact({
-#     "FACT_NAME": "Salary",
-#     "FACT_TYPE": "number",
-#     "COMMENT": "Зарплата",
-#     # "DEFAULT_VALUE": "Accept"
+#     "FACT_NAME": "testfact",
+#     "FACT_TYPE": "text",
+#     "COMMENT": "xxxxx",
+#     # "DEFAULT_VALUE": "Positive"
 # })
 
-#
+
 # result = add_rule({
-#     "RULE_NAME": "Test_Rule_2",
+#     "RULE_NAME": "R005",
 #     "RULE_LHS": [
 #         {
-#             "LHS_FACT_NAME": "Salary",
-#             "LHS_OP": "lt",
-#             "LHS_VALUE": 25000
-#         }
+#             "LHS_FACT_NAME": "cusImpression",
+#             "LHS_OP": "eq",
+#             "LHS_VALUE": "Negative"
+#         },
+#         # {
+#         #     "LHS_FACT_NAME": "Segment",
+#         #     "LHS_OP": "ne",
+#         #     "LHS_VALUE": "NTB"
+#         # }
 #     ],
-#     "RULE_RHS": {
-#         "RHS_FACT_NAME": "DECISION_RESULT",
-#         "RHS_FACT_VALUE": "Reject"
-#     },
-#     "COMMENT": "Отсечение по зарплате",
-#     "PRIORITY": 3,
+#     # "RULE_RHS": {
+#     #   "RHS_FACT_NAME": "Segment",
+#     #   "RHS_FACT_VALUE": "EXIST"
+#     # },
+#     "RULE_TYPE": "R",
+#     "COMMENT": "Впечатление об участинке - негативное",
+#     "PRIORITY": 1,
 # })
 
 

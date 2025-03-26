@@ -25,13 +25,14 @@ ruleSchema = {
             "additionalProperties": False,
             "minProperties": 2
         },
+        "RULE_TYPE": {"type": ["string"], "enum": ["R", "I", "Tech"]},
         "COMMENT": {"type": ["string", "null"]},
         "PRIORITY": {"type": "number"},
     },
     "additionalProperties": False,
+    "required": ["RULE_TYPE"],
     "minProperties": 4
 }
-
 
 init_fact_schema = {
     "type": "object",
@@ -39,7 +40,7 @@ init_fact_schema = {
         "FACT_NAME": {"type": "string"},
         "FACT_TYPE": {"type": "string", "enum": ["text", "number", "bool"]},
         "COMMENT": {"type": "string"},
-        "DEFAULT_VALUE": {"type": "string"}
+        "DEFAULT_VALUE": {"type": ["string", "number", "boolean"]}
     },
     "additionalProperties": False,
     "minProperties": 3

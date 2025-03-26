@@ -3,7 +3,7 @@ from operator import itemgetter
 
 
 class Core:
-    rules_activated = set()
+    rules_activated = list()
 
     def __init__(self, db_session):
         self.db = db_session
@@ -14,8 +14,8 @@ class Core:
         self.facts = self.__init_facts()
         self.validate_rules_with_facts()
 
-        print(self.facts)
-        print(*self.rules, sep="\n")
+        # print(self.facts)
+        # print(*self.rules, sep="\n")
 
     def __get_rules(self) -> list:
         """
@@ -26,12 +26,16 @@ class Core:
         for rule_record in sorted(self.db.get_all_records("RULES"), key=itemgetter(5)):
             # print(rule_record)
             rule_name = rule_record[0]
-            rule_rhs = {
-                "RHS_FACT_NAME": rule_record[1],
-                "RHS_FACT_VALUE": utils.retype_fact_value(rule_record[2], self.facts_db[rule_record[1]]["FACT_TYPE"])
-            }
-            rule_add_date = rule_record[3]
-            rule_comment = rule_record[4]
+            if rule_record[1] and rule_record[2]:
+                rule_rhs = {
+                    "RHS_FACT_NAME": rule_record[1],
+                    "RHS_FACT_VALUE": utils.retype_fact_value(rule_record[2], self.facts_db[rule_record[1]]["FACT_TYPE"])
+                }
+            else:
+                rule_rhs = None
+            rule_type = rule_record[3]
+            rule_add_date = rule_record[4]
+            rule_comment = rule_record[5]
 
             rule_lhs = []
             rule_lhs_record = self.db.select_many("""SELECT * from RULES_LHS WHERE RULE_NAME in (?)""", [rule_name])
@@ -46,6 +50,7 @@ class Core:
                 "RULE_NAME": rule_name,
                 "RULE_LHS": rule_lhs,
                 "RULE_RHS": rule_rhs,
+                "RULE_TYPE": rule_type,
                 "COMMENT": rule_comment,
                 "ADD_DATE": rule_add_date,
             }
@@ -64,6 +69,9 @@ class Core:
         """
         records = self.db.get_facts()
         facts = dict((item['FACT_NAME'], item) for item in records)
+        
+        for key in facts.keys():
+            facts[key]["DEFAULT_VALUE"] = utils.convert_type(facts[key]["DEFAULT_VALUE"], facts[key]["FACT_TYPE"])
         return facts
 
     def __init_facts(self) -> dict:
@@ -79,19 +87,28 @@ class Core:
     def start(self):
         for rule in self.rules:
             rule_name = rule["RULE_NAME"]
+            rule_type = rule["RULE_TYPE"]
+            if "COMMENT" in rule: 
+                rule_description = rule["COMMENT"] 
+            else: rule_description = None
             # rule_lhs_list = rule[1].split(";")
-            rule_rhs_fact_name = rule["RULE_RHS"]["RHS_FACT_NAME"]
-            rule_rhs_fact_value = rule["RULE_RHS"]["RHS_FACT_VALUE"]
-            rule_rhs_fact_value = utils.retype_fact_value(rule_rhs_fact_value,
-                                                          self.facts_db[rule_rhs_fact_name]["FACT_TYPE"])
+            if rule.get("RULE_RHS") != None:
+                rule_rhs_fact_name = rule["RULE_RHS"]["RHS_FACT_NAME"]
+                rule_rhs_fact_value = rule["RULE_RHS"]["RHS_FACT_VALUE"]
+                rule_rhs_fact_value = utils.retype_fact_value(rule_rhs_fact_value,
+                                                            self.facts_db[rule_rhs_fact_name]["FACT_TYPE"])
             if self.__is_true_rule(rule["RULE_LHS"]):
-                if self.facts[rule_rhs_fact_name] != rule_rhs_fact_value \
-                        and self.facts[rule_rhs_fact_name] == self.facts_db[rule_rhs_fact_name]["DEFAULT_VALUE"]:
+                # if self.facts[rule_rhs_fact_name] != rule_rhs_fact_value \
+                #         and self.facts[rule_rhs_fact_name] == self.facts_db[rule_rhs_fact_name]["DEFAULT_VALUE"]:
                     # Для предотвращения бесконечной рекурсии (зацикливания) факт можно обновлять только один раз
-
+                if not (any(rule["rule_name"] == rule_name for rule in self.rules_activated)):
                     # print(f"Сработало правило {rule_name}")
-                    self.rules_activated.add(rule_name)
-                    self.declare_fact(rule_rhs_fact_name, rule_rhs_fact_value)
+                    self.rules_activated.append({
+                        "rule_name": rule_name,
+                        "rule_type": rule_type,
+                        "rule_description": rule_description
+                    })
+                    if rule.get("RULE_RHS") != None: self.declare_fact(rule_rhs_fact_name, rule_rhs_fact_value)
                     # print(self.facts)
                     self.start()
 
@@ -103,10 +120,11 @@ class Core:
         for lhs in rule["RULE_LHS"]:
             fact_in_rules.add(lhs['LHS_FACT_NAME'])
 
-        fact_in_rules.add(rule["RULE_RHS"]["RHS_FACT_NAME"])
+        if rule.get("RULE_RHS") is not None:
+            fact_in_rules.add(rule["RULE_RHS"]["RHS_FACT_NAME"])
 
         facts_in_facts_db = set(self.fact_names)
-
+        
         # Если множество фактов из правил в множестве фактов из БД
         if fact_in_rules.issubset(facts_in_facts_db):
             pass  # TODO
@@ -114,7 +132,8 @@ class Core:
             # элементы первого списка которые НЕ находятся во втором списке
             minus_sets = fact_in_rules - facts_in_facts_db
             error_messages.append(
-                f"Ошибка валидации правила {rule['RULE_NAME']}.Факт(ы) {minus_sets} не инициализированы")
+                f"Ошибка валидации правила {rule['RULE_NAME']}. Факт(ы) {minus_sets} не инициализированы")
+            return utils.return_message("error", error_messages)
 
         # 2. Проверка типов данных в правилах и БД фактах
         for lhs in rule["RULE_LHS"]:
@@ -169,6 +188,7 @@ class Core:
         # Проверка наличия факта в БД
         if fact_name not in self.fact_names:
             error_messages.append(f"Факт '{fact_name}' не инициализирован")
+            return utils.return_message("error", error_messages) 
         fact_value = utils.retype_fact_value(fact_value, self.facts_db[fact_name]["FACT_TYPE"])
         if not self.__is_declared_type_is_right_type(fact_name, fact_value):
             error_messages.append(f"Факт '{fact_name}' имеет неинициализированный тип")
@@ -261,13 +281,14 @@ class Core:
         # lhs_fact_name_to_add
         similar_rules = []
         for rule in self.rules:
-            if rule["RULE_RHS"]["RHS_FACT_NAME"] == rule_to_add["RULE_RHS"]["RHS_FACT_NAME"] \
-                    and rule["RULE_RHS"]["RHS_FACT_VALUE"] == rule_to_add["RULE_RHS"]["RHS_FACT_VALUE"] \
-                    and set([x["LHS_FACT_NAME"] for x in rule["RULE_LHS"]]) == \
-                    set([x["LHS_FACT_NAME"] for x in rule_to_add["RULE_LHS"]]):
+            if rule_to_add.get("RULE_RHS") != None:
+                if rule["RULE_RHS"]["RHS_FACT_NAME"] == rule_to_add["RULE_RHS"]["RHS_FACT_NAME"] \
+                        and rule["RULE_RHS"]["RHS_FACT_VALUE"] == rule_to_add["RULE_RHS"]["RHS_FACT_VALUE"] \
+                        and set([x["LHS_FACT_NAME"] for x in rule["RULE_LHS"]]) == \
+                        set([x["LHS_FACT_NAME"] for x in rule_to_add["RULE_LHS"]]):
 
-                similar_rules.append(rule["RULE_NAME"])
-        if similar_rules is None:
+                    similar_rules.append(rule["RULE_NAME"])
+        if similar_rules == []:
             return utils.return_message("success", None)
         else:
             return utils.return_message("warning", similar_rules)

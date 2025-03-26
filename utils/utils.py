@@ -28,6 +28,19 @@ def retype_fact_value(value, fact_type: str):
         return str2bool(value)
     else:
         return value
+    
+# Функция для преобразования значения в нужный тип
+def convert_type(value, target_type):
+    if target_type == 'bool':
+        return bool(int(value))  # '0' -> False, '1' -> True
+    elif target_type == 'int':
+        return int(value)
+    elif target_type == 'float':
+        return float(value)
+    elif target_type == 'str':
+        return str(value)
+    else:
+        return value  # Если тип неизвестен, оставляем как есть
 
 
 def is_fact_type(value, fact_type: str) -> bool:
@@ -35,7 +48,7 @@ def is_fact_type(value, fact_type: str) -> bool:
         return True
     elif fact_type == "number" and isinstance(value, float):
         return True
-    elif fact_type == "bool" and isinstance(value, bool):
+    elif fact_type == "bool" and (isinstance(value, bool)):
         return True
     else:
         return False
@@ -46,7 +59,8 @@ def get_truth(fact_value, relate: str, value) -> bool:
            'lt': operator.lt,  # <
            'ge': operator.ge,  # >=
            'le': operator.le,  # <=
-           'eq': operator.eq}  # ==
+           'eq': operator.eq,  # ==
+           'ne': operator.ne}  # !=
 
     if relate not in ops:
         return False
